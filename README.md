@@ -17,15 +17,6 @@ The goal of the game is to collect cheese, upgrade your production, and progress
 
 ---
 
-## Project Team
-This project was developed by:
-
-- **LeoStarCode** (Project Lead & Programmer)  
-- *Tag your teammates here*  
-- *Tag your teachers/mentors if you want*
-
----
-
 ## Live Website
 Hosted on **GitHub Pages**:  
 `https://LeoStarCode.github.io/MoonyClicker`

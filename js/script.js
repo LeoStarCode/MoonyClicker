@@ -16,6 +16,8 @@ const musicMuteBtn = document.getElementById('music-mute');
 const musicVolumeInput = document.getElementById('music-volume');
 // Language selector
 const langSelect = document.getElementById('lang-select');
+// Reset button
+const resetBtn = document.getElementById('reset-btn');
 // Default language: prefer saved value, otherwise default to Hebrew ('he')
 let currentLang = localStorage.getItem('lang') || 'he';
 
@@ -69,6 +71,32 @@ UI_TEXT.he.noCheeseMsg = 'אין לך מספיק גבינה!';
 UI_TEXT.en.musicEnable = 'Enable Music';
 UI_TEXT.he.musicEnable = 'הפעל מוסיקה';
 
+// Scale names for localized formatting
+UI_TEXT.en.scales = {
+    thousand: 'thousand',
+    million: 'million',
+    billion: 'billion',
+    trillion: 'trillion',
+    quadrillion: 'quadrillion',
+    quintillion: 'quintillion',
+    sextillion: 'sextillion',
+    septillion: 'septillion',
+    octillion: 'octillion',
+    nonillion: 'nonillion'
+};
+UI_TEXT.he.scales = {
+    thousand: 'אלף',
+    million: 'מיליון',
+    billion: 'מיליארד',
+    trillion: 'טריליון',
+    quadrillion: 'קוודריליון',
+    quintillion: 'קווינטיליון',
+    sextillion: 'סקסטיליון',
+    septillion: 'ספטיליון',
+    octillion: 'אוקטיליון',
+    nonillion: 'נוניליון'
+};
+
 function applyDirection() {
     try {
         const isRtl = currentLang === 'he';
@@ -85,6 +113,44 @@ function applyDirection() {
 // Helper to format template strings like {level} and {cost}
 function fmt(template, vars) {
     return template.replace(/\{(.*?)\}/g, (_, k) => vars[k.trim()] !== undefined ? vars[k.trim()] : '');
+}
+
+// Localized number formatter: converts large numbers to e.g. "10 thousand" or "1.23 million"
+function formatNumberLocalized(n) {
+    if (n === null || n === undefined || isNaN(n)) return String(n);
+    const num = Number(n);
+    const abs = Math.abs(num);
+    const scales = UI_TEXT[currentLang] && UI_TEXT[currentLang].scales ? UI_TEXT[currentLang].scales : UI_TEXT.en.scales;
+    if (abs < 1000) {
+        // For small numbers, show integer if whole, otherwise two decimals
+        return Number.isInteger(num) ? String(num) : num.toFixed(2);
+    }
+    const mapping = [
+        { v: 1e30, k: 'nonillion' },
+        { v: 1e27, k: 'octillion' },
+        { v: 1e24, k: 'septillion' },
+        { v: 1e21, k: 'sextillion' },
+        { v: 1e18, k: 'quintillion' },
+        { v: 1e15, k: 'quadrillion' },
+        { v: 1e12, k: 'trillion' },
+        { v: 1e9, k: 'billion' },
+        { v: 1e6, k: 'million' },
+        { v: 1e3, k: 'thousand' }
+    ];
+    for (const m of mapping) {
+        if (abs >= m.v) {
+            const val = num / m.v;
+            // choose decimals: show no decimals if near-integer, otherwise 2 for small, 1 for larger
+            const rounded = Math.round(val);
+            let valStr;
+            if (Math.abs(val - rounded) < 0.005) valStr = String(rounded);
+            else if (Math.abs(val) < 10) valStr = val.toFixed(2);
+            else valStr = val.toFixed(1);
+            const name = scales[m.k] || m.k;
+            return `${valStr} ${name}`;
+        }
+    }
+    return String(num);
 }
 
 // Initialize music settings from localStorage
@@ -176,9 +242,24 @@ const upgradeButtonsLabeled = {
 // Add getters for scaled upgrade values
 for (const key in upgradeButtonsLabeled) {
     const upgrade = upgradeButtonsLabeled[key];
-    Object.defineProperty(upgrade, 'cpsUp', { get: () => Math.floor(upgrade.baseCPS * Math.pow(1.1, upgrade.timesBought)) });
-    Object.defineProperty(upgrade, 'cpcUp', { get: () => Math.floor(upgrade.baseCPC * Math.pow(1.1, upgrade.timesBought)) });
-    Object.defineProperty(upgrade, 'cost', { get: () => Math.floor(upgrade.baseCost * Math.pow(1.15, upgrade.timesBought) + upgrade.cpsUp + upgrade.cpcUp) });
+    // Helper will be defined below; use getters that call helper to apply diminishing returns
+    Object.defineProperty(upgrade, 'cpsUp', { get: () => computeUpgradeEffect(upgrade.baseCPS, upgrade.timesBought) });
+    Object.defineProperty(upgrade, 'cpcUp', { get: () => computeUpgradeEffect(upgrade.baseCPC, upgrade.timesBought) });
+    // Make costs scale faster and add a soft exponential penalty so repeated purchases get expensive
+    Object.defineProperty(upgrade, 'cost', { get: () => Math.max(1, Math.floor(upgrade.baseCost * Math.pow(1.35, upgrade.timesBought) * (1 + Math.pow(upgrade.timesBought, 1.18) * 0.03) + Math.floor((upgrade.cpsUp + upgrade.cpcUp) / 2))) });
+}
+
+// Compute upgrade effect with mild growth and diminishing returns so high counts give less per-buy
+function computeUpgradeEffect(baseValue, timesBought) {
+    const times = Math.max(0, Number(timesBought) || 0);
+    // base growth per purchase (smaller than before)
+    const growth = 1.05;
+    const raw = baseValue * Math.pow(growth, times);
+    // diminishing factor: grows with log10(times+1) so first few purchases are strong,
+    // but returns taper off as times increases
+    const damp = 1 + Math.log10(times + 1) * 0.45; // 0.45 tunes strength of damping
+    const val = Math.floor(raw / damp);
+    return Math.max(0, val);
 }
 
 // --- Moon upgrade persistence helpers ---
@@ -221,8 +302,9 @@ function _recomputeAsideValuesFromSaved() {
         // sum contributions for purchases 1..times
         let sumCps = 0, sumCpc = 0;
         for (let i = 1; i <= times; i++) {
-            sumCps += Math.floor(u.baseCPS * Math.pow(1.1, i));
-            sumCpc += Math.floor(u.baseCPC * Math.pow(1.1, i));
+            // Use the same diminishing formula applied by the live getters
+            sumCps += computeUpgradeEffect(u.baseCPS, i);
+            sumCpc += computeUpgradeEffect(u.baseCPC, i);
         }
         asideCPS += sumCps;
         asideCPC += sumCpc;
@@ -281,9 +363,13 @@ function spawnUpgradeOnMoonKey(key, persist = true) {
 
 // Update scaling values
 function updateValues() {
-    cpc = (level < 2 ? 1 : Math.ceil(level - 1 + Math.pow(level, 2.5))) + asideCPC;
-    cps = (level < 2 ? 0 : Math.ceil(Math.pow(level,   2.25))) + asideCPS;
-    levelCost = level < 2 ? 50 : Math.floor(50 * Math.pow(level, 2.8));
+    // Make base progression milder so upgrades and levelups feel more meaningful
+    // cpc grows slowly with level; upgrades still add to asideCPC
+    cpc = (level < 2 ? 1 : Math.ceil(1 + Math.pow(level, 1.35))) + asideCPC;
+    // cps also grows more slowly with level
+    cps = (level < 2 ? 0 : Math.ceil(Math.pow(level, 1.6))) + asideCPS;
+    // Raise level-up costs significantly to slow leveling
+    levelCost = level < 2 ? 100 : Math.floor(100 * Math.pow(level, 3.0));
 }
 
 // Update UI
@@ -291,10 +377,10 @@ function updateCoreElements() {
     updateValues();
     // Use translations from currentLang
     const t = UI_TEXT[currentLang] || UI_TEXT.en;
-    cheeseCountLabel.textContent = t.cheeseCount + Math.floor(score);
-    cpsLabel.textContent = t.cps + cps;
+    cheeseCountLabel.textContent = t.cheeseCount + formatNumberLocalized(Math.floor(score));
+    cpsLabel.textContent = t.cps + formatNumberLocalized(cps);
     levelInfoLabel.innerHTML = fmt(t.levelInfo, { level });
-    levelUpButton.textContent = fmt(t.levelUp, { cost: levelCost });
+    levelUpButton.textContent = fmt(t.levelUp, { cost: formatNumberLocalized(levelCost) });
     for (const key in upgradeButtonsLabeled) {
         const upgrade = upgradeButtonsLabeled[key];
         // Use the upgrade's proper name and current cost when rendering the button label
@@ -302,7 +388,7 @@ function updateCoreElements() {
             // pick translated upgrade name if available
             const name = (UI_TEXT[currentLang] && UI_TEXT[currentLang].upgrades && UI_TEXT[currentLang].upgrades[key]) || upgrade.name;
             const costLabel = (UI_TEXT[currentLang] && UI_TEXT[currentLang].costLabel) || 'Cost';
-            upgrade.btn.innerHTML = `<img src="${upgrade.src}" alt="${name}" width="32" height="32">  ${name} (${costLabel}: ${upgrade.cost})`;
+            upgrade.btn.innerHTML = `<img src="${upgrade.src}" alt="${name}" width="32" height="32">  ${name} (${costLabel}: ${formatNumberLocalized(upgrade.cost)})`;
             // keep a data-tooltip attribute if one exists in static HTML
             if (!upgrade.btn.dataset.tooltip) upgrade.btn.dataset.tooltip = upgrade.btn.getAttribute('data-tooltip') || '';
         }
@@ -321,11 +407,68 @@ function saveCore() {
     localStorage.setItem("level", level);
 }
 
-// Manual click
-clickerButton.addEventListener('click', (e) => {
-    register_click(cpc);
-    popCheesePopup(e);
-});
+// Reset the entire game progress (clears stored progress, removes moon icons, resets variables)
+function resetGame() {
+    const confirmMsg = currentLang === 'he' ? 'אתה בטוח שברצונך לאפס את כל ההתקדמות? פעולה זו אינה ניתנת לביטול.' : 'Are you sure you want to reset all progress? This cannot be undone.';
+    if (!confirm(confirmMsg)) return;
+    try {
+        // Clear core progress and saved upgrades/moon icons. Keep `lang` so UI stays in user's chosen language.
+        localStorage.removeItem('score');
+        localStorage.removeItem('level');
+        localStorage.removeItem('moonUpgrades');
+        localStorage.removeItem('upgradesState');
+        localStorage.removeItem('musicEnabled');
+        localStorage.removeItem('musicMuted');
+        localStorage.removeItem('musicVolume');
+    } catch (e) { console.error('reset storage error', e); }
+
+    // Reset runtime state
+    score = 0;
+    level = 1;
+    asideCPS = 0;
+    asideCPC = 0;
+
+    // Reset upgrade counts
+    for (const k in upgradeButtonsLabeled) {
+        if (upgradeButtonsLabeled[k]) upgradeButtonsLabeled[k].timesBought = 0;
+    }
+
+    // Remove any moon upgrade elements from DOM
+    try { document.querySelectorAll('img.moon-upgrade').forEach(el => el.remove()); } catch (e) {}
+
+    // Persist cleared storage structures
+    try { _saveStoredMoonUpgrades([]); _saveStoredUpgradeCounts({}); } catch (e) {}
+
+    // Reset music to sensible defaults
+    if (bgMusicEl) {
+        try { bgMusicEl.pause(); bgMusicEl.currentTime = 0; bgMusicEl.muted = false; bgMusicEl.volume = 0.5; } catch (e) {}
+    }
+    if (musicVolumeInput) musicVolumeInput.value = Math.round((bgMusicEl && bgMusicEl.volume) ? bgMusicEl.volume * 100 : 50);
+    updateMusicUI();
+
+    // Remove transient UI popups/tooltips
+    document.querySelectorAll('.upgrade-tooltip, .cheese-popup, #question-overlay, #music-enable-hint').forEach(n => n.remove());
+
+    // Recompute and update UI
+    _recomputeAsideValuesFromSaved();
+    updateCoreElements();
+    saveCore();
+}
+
+// Wire reset button (if present)
+if (resetBtn) {
+    resetBtn.addEventListener('click', resetGame);
+}
+
+// Manual click (guarded)
+if (clickerButton) {
+    clickerButton.addEventListener('click', (e) => {
+        try {
+            register_click(cpc);
+            popCheesePopup(e);
+        } catch (err) { console.error('click handler error', err); }
+    });
+}
 
 // Cheese popup
 function popCheesePopup(e) {
@@ -334,7 +477,7 @@ function popCheesePopup(e) {
     cheesePopup.className = "cheese-popup fade-out-up";
     cheesePopup.style.left = (e.clientX + 10) + "px";
     cheesePopup.style.top = (e.clientY - 10) + "px";
-    cheesePopup.innerHTML = `<img src="./assets/images/cheese.png" width="32" height="32"><span class="popup-text">+${cpc}</span>`;
+    cheesePopup.innerHTML = `<img src="./assets/images/cheese.png" width="32" height="32"><span class="popup-text">+${formatNumberLocalized(cpc)}</span>`;
     document.body.appendChild(cheesePopup);
     cheesePopup.addEventListener("animationend", () => cheesePopup.remove());
 }
@@ -447,22 +590,28 @@ function showRandomQuestion(callback) {
     showQuestionPopup(quizData.questions[randomIndex], callback);
 }
 
-// Level Up with question
-levelUpButton.addEventListener('click', () => {
-    if (score >= levelCost) {
-        showRandomQuestion(isCorrect => {
-            if (isCorrect) {
-                score -= levelCost;
-                level++;
-                updateCoreElements();
-                saveCore();
-            }
-        });
-    } else {
+// Level Up with question (guarded)
+if (levelUpButton) {
+    levelUpButton.addEventListener('click', () => {
+        if (score >= levelCost) {
+            showRandomQuestion(isCorrect => {
+                if (isCorrect) {
+                    score -= levelCost;
+                    level++;
+                    updateCoreElements();
+                    saveCore();
+                } else {
+                    score -= levelCost / 2; // penalty for wrong answer
+                    updateCoreElements();
+                    saveCore();
+                }
+            });
+        } else {
             const msg = (UI_TEXT[currentLang] && UI_TEXT[currentLang].noCheeseMsg) || UI_TEXT.en.noCheeseMsg;
             alert(msg);
-    }
-});
+        }
+    });
+}
 
 // Upgrade buttons
 for (const key in upgradeButtonsLabeled) {
@@ -486,6 +635,10 @@ for (const key in upgradeButtonsLabeled) {
                     saveCore();
                     // spawn a little icon on the moon to mark this purchase and save it
                     try { spawnUpgradeOnMoonKey && spawnUpgradeOnMoonKey(key, true); } catch (e) { console.error(e); }
+                } else {
+                    score -= upgrade.cost / 2; // penalty for wrong answer
+                    updateCoreElements();
+                    saveCore();
                 }
             });
         } else {
@@ -517,9 +670,9 @@ for (const key in upgradeButtonsLabeled) {
             tip.dir = (currentLang === 'he') ? 'rtl' : 'ltr';
             tip.innerHTML = `
                 <div class="ut-title">${translatedName}</div>
-                <div class="ut-meta">${costLabel}: ${upgrade.cost}</div>
-                <div class="ut-meta">${givesLabel}: +${upgrade.cpsUp} ${units.cps}, +${upgrade.cpcUp} ${units.cpc}</div>
-                <div class="ut-meta">${ownedLabel}:<span class="ut-owned"> ${upgrade.timesBought}</span></div>
+                <div class="ut-meta">${costLabel}: ${formatNumberLocalized(upgrade.cost)}</div>
+                <div class="ut-meta">${givesLabel}: +${formatNumberLocalized(upgrade.cpsUp)} ${units.cps}, +${formatNumberLocalized(upgrade.cpcUp)} ${units.cpc}</div>
+                <div class="ut-meta">${ownedLabel}:<span class="ut-owned"> ${formatNumberLocalized(upgrade.timesBought)}</span></div>
             `;
             document.body.appendChild(tip);
 

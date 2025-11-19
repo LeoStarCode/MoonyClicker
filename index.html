@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <!-- Page Setup -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moony Clicker</title>
+
+    <!-- Link CSS and Website Icon -->
+    <link rel="icon" type="image/x-icon" href="./assets/images/moon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="./assets/styles.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Header -->
+    <section id="header" class="bg-dark">
+        <div class="container">
+            <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+                <a href="/"
+                    class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+                    <img src="./assets/images/moon.png" alt="לוגו המשחק - ירח קטן" class="bi me-2"> <span
+                        class="fs-4 fw-bold text-warning">Moony Clicker</span>
+                </a>
+                <!-- Music Controls (center) -->
+                <div id="music-center" class="music-controls d-flex align-items-center justify-content-center mx-auto">
+                    <audio id="bg-music" src="./assets/audio/music.mp3" loop preload="auto"></audio>
+                    <!-- On/Off music toggle -->
+                    <button id="music-toggle" class="music-toggle btn btn-sm me-2" aria-pressed="false" title="On / Off">Off</button>
+                    <!-- Mute button that expands to volume on hover -->
+                    <div class="mute-wrapper">
+                        <button id="music-mute" class="music-mute btn btn-sm" title="Mute / Unmute">🔊</button>
+                        <div class="volume-popout" aria-hidden="true">
+                            <input id="music-volume" type="range" min="0" max="100" value="50" aria-label="Music volume" class="form-range">
+                        </div>
+                    </div>
+                    <!-- Language selector -->
+                    <select id="lang-select" class="form-select form-select-sm ms-2" style="width:90px;">
+                        <option value="en">EN</option>
+                        <option value="he">HE</option>
+                    </select>
+                </div>
+                <a class="btn btn-warning text-light" href="https://orteil.dashnet.org/cookieclicker/"
+                    target="_blank">Original Cookie Clicker</a>
+            </header>
+        </div>
+    </section>
+
+    <!-- Main Body -->
+    <section id="body" class="d-flex justify-content-center align-items-start">
+        <!-- Clicker Area -->
+        <div id="clicker-area" class="flex-grow-1 text-center">
+                <div id="clicker">
+                <h2 id="cheese-count" class="text-light">Cheese Count: 0</h2>
+                <h2 id="cps" class="text-light">Cheese Per Second: 0</h2>
+                <button id="clicker-btn" type="button" class="transparent-button" disabled>
+                    <img id="moon" src="./assets/images/moon-clicker.png" alt="לחצן הירח" draggable="false">
+                </button>
+            </div>
+        </div>
+
+        <!-- Dual Shop Panels -->
+        <div id="shops">
+            <!-- Level Ups -->
+            <aside id="level-shop" class="shop-section bg-dark text-light p-3">
+                <h3 class="text-warning text-center mb-3">Level Ups</h3>
+                <div class="shop-content d-flex flex-column gap-3">
+                    <button class="btn btn-warning text-dark fw-bold" id="upgrade-click" disabled>Level Up
+                        (Cost: 50)</button>
+                </div>
+                <p id="level-info">
+                    By leveling up you get abilities like getting more cheese per click and cheese per second. As you progress it'll get harder to level up and the changes would get less affective.<br><b>You are currently level 1.</b>
+                </p>
+            </aside>
+            <!-- Upgrade Shop -->
+            <aside id="upgrade-shop" class="shop-section bg-dark text-light p-3">
+                <h3 class="text-warning text-center mb-3">Upgrade Shop</h3>
+                <div class="shop-content d-flex flex-column gap-3">
+                    <button class="btn btn-warning text-dark fw-bold upgrade-button" data-tooltip="מציע כמה עוזרים קטנים שיעזרו לך לקבל גבינה🧀"><img src="assets/images/pointer.png" alt="מצביע" width="32" height="32">  מצביע (עלות: 15)</button>
+                    <button class="btn btn-warning text-dark fw-bold upgrade-button" data-tooltip="נותן לך יכולת להוציא גבינה מתוך זהב כי מי צריך זהב?🧀"><img src="assets/images/golden_cheese.png" alt="גבינת זהב" width="32" height="32">  גבינת זהב (עלות: 200)</button>
+                    <button class="btn btn-warning text-dark fw-bold upgrade-button" data-tooltip="מגנט חתיכות גבינה ממכרות הירח🧀"><img src="assets/images/moon-magnet.png" alt="מגנט ירח" width="32" height="32">מגנט ירח (עלות: 1000)</button>
+                    <button class="btn btn-warning text-dark fw-bold upgrade-button" data-tooltip="מספק גבינה מהמפעל עם עובדי הגבינה הטובים ביותר🧀"><img src="assets/images/cheese-factory.png" alt="מפעל גבינה" width="32" height="32">  מפעל גבינה (עלות: 25000)</button>
+                    <button class="btn btn-warning text-dark fw-bold upgrade-button" data-tooltip="פרות קוסמיות שמייצרות גבינה נוספת🧀"><img src="assets/images/cosmic-cow.png" alt="פרה קוסמית" width="32" height="32">  פרה קוסמית (עלות: 100000)</button>
+                    <button class="btn btn-warning text-dark fw-bold upgrade-button" data-tooltip="משגר רקטות שמשגר גבינה ומגדיל את כמויותיה🧀"><img src="assets/images/rocket-launcher.png" alt="משגר רקטות" width="32" height="32">  משגר רקטות (עלות: 20000000)</button>
+                </div>
+                
+            </aside>
+        </div>
+    </section>
+
+    <!-- footer -->
+    <section id="footer" class="bg-dark">
+        <div class="container">
+            <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+                <p class="col-md-4 mb-0 text-light">Credit: <a href="https://orteil.dashnet.org/cookieclicker/"
+                        class="text-light" target="_blank">Original Cookie Clicker</a></p>
+        </div>
+        <br>
+
+    </section>
+
+    <!-- JavaScript -->
+    <script src="./js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -1,0 +1,149 @@
+{
+  "title": "Questions for the game",
+  "language": "en",
+  "questions": [
+    {
+      "id": 1,
+      "question": "What is the main purpose of heavy launchers?",
+      "options": [
+        "To launch light payloads for short flights around Earth",
+        "To send heavy payloads into space and carry out manned and scientific missions to distant locations",
+        "To serve as practice flights for beginner pilots",
+        "To generate alternative energy for power plants on Earth"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "id": 2,
+      "question": "What is the main problem that heavy launchers solve?",
+      "options": [
+        "Inability to fly planes outside the atmosphere",
+        "Difficulty in guiding satellites into precise orbits",
+        "Inability to launch heavy payloads and reach large distances in space",
+        "Need to save materials for building satellites"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "id": 3,
+      "question": "Why is the fairing released during launch?",
+      "options": [
+        "To make room for astronauts",
+        "To reduce weight and make the mission more efficient",
+        "To test the launcher's stability",
+        "To replace engines midway"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "id": 4,
+      "question": "Which of the following is NOT a function of heavy launchers?",
+      "options": [
+        "Building space stations and bases on the Moon",
+        "Transporting equipment for scientific missions in space",
+        "Performing short recreational space flights for tourists",
+        "Launching manned spacecraft to Mars"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "id": 5,
+      "question": "What is the advantage of staging during a launch?",
+      "options": [
+        "Maintaining a constant engine temperature",
+        "Reducing the use of the fairing during flight",
+        "Saving fuel and achieving appropriate speed and altitude",
+        "Ability to return to Earth independently"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "id": 6,
+      "question": "What is the main role of propulsion systems in spacecraft?",
+      "options": [
+        "To maintain internal heat in the spacecraft",
+        "To allow movement, change direction and speed in space",
+        "To store supplies for astronauts",
+        "To operate communication systems"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "id": 7,
+      "question": "Why is a propulsion system needed in space?",
+      "options": [
+        "Because space has friction that requires slowing down",
+        "Because there is no electricity supply in space",
+        "Because in space there is no air or friction so thrust is needed to move",
+        "To operate the spacecraft's main computer"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "id": 8,
+      "question": "What is the main purpose of communication in space?",
+      "options": [
+        "To measure the temperature of the stars",
+        "To allow control, information transfer, and data reception between spacecraft and Earth",
+        "To find shorter paths for space travel",
+        "To operate automatic navigation systems"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "id": 9,
+      "question": "Why can't you communicate in space using sound?",
+      "options": [
+        "Because sound weakens at high altitudes",
+        "Because space is too noisy",
+        "Because there is no air in space to carry sound",
+        "Because the speed of sound is too high in space"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "id": 10,
+      "question": "What is the main purpose of life support systems in space?",
+      "options": [
+        "To provide speed and rockets to the spacecraft",
+        "To allow astronauts to survive and stay healthy in extreme space conditions",
+        "To launch satellites into space",
+        "To measure radiation from stars"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "id": 12,
+      "question": "Which of the following is NOT part of life support systems in space?",
+      "options": [
+        "Temperature and pressure regulation",
+        "Oxygen production and carbon dioxide removal",
+        "Removal of dirt/garbage",
+        "Launching additional spacecraft"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "id": 13,
+      "question": "What is the main purpose of landing solutions in space?",
+      "options": [
+        "To accelerate the spacecraft to higher speeds",
+        "To ensure the spacecraft reaches the ground or water safely and in a controlled way",
+        "To measure gravity on other celestial bodies",
+        "To send additional spacecraft into the air"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "id": 14,
+      "question": "What is the main purpose of landing solutions in space?",
+      "options": [
+        "To accelerate the spacecraft to higher speeds",
+        "To ensure the spacecraft reaches the ground or water safely and in a controlled way",
+        "To measure gravity on other celestial bodies",
+        "To send additional spacecraft into the air"
+      ],
+      "correctIndex": 1
+    }
+  ]
+}

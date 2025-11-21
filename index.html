@@ -28,12 +28,14 @@
                 <div id="music-center" class="music-controls d-flex align-items-center justify-content-center mx-auto">
                     <audio id="bg-music" src="./assets/audio/music.mp3" loop preload="auto"></audio>
                     <!-- On/Off music toggle -->
-                    <button id="music-toggle" class="music-toggle btn btn-sm me-2" aria-pressed="false" title="On / Off">Off</button>
+                    <button id="music-toggle" class="music-toggle btn btn-sm me-2" aria-pressed="false"
+                        title="On / Off">Off</button>
                     <!-- Mute button that expands to volume on hover -->
                     <div class="mute-wrapper">
                         <button id="music-mute" class="music-mute btn btn-sm" title="Mute / Unmute">🔊</button>
                         <div class="volume-popout" aria-hidden="true">
-                            <input id="music-volume" type="range" min="0" max="100" value="50" aria-label="Music volume" class="form-range">
+                            <input id="music-volume" type="range" min="0" max="100" value="50" aria-label="Music volume"
+                                class="form-range">
                         </div>
                     </div>
                     <!-- Language selector -->
@@ -43,7 +45,7 @@
                     </select>
                     <!-- Reset progress button -->
                 </div>
-                <a class="btn btn-warning text-light" href="https://orteil.dashnet.org/cookieclicker/"
+                <a id="original-link-header" class="btn btn-warning text-light" href="https://orteil.dashnet.org/cookieclicker/"
                     target="_blank">Original Cookie Clicker</a>
             </header>
         </div>
@@ -53,7 +55,7 @@
     <section id="body" class="d-flex justify-content-center align-items-start">
         <!-- Clicker Area -->
         <div id="clicker-area" class="flex-grow-1 text-center">
-                <div id="clicker">
+            <div id="clicker">
                 <h2 id="cheese-count" class="text-light">Cheese Count: 0</h2>
                 <h2 id="cps" class="text-light">Cheese Per Second: 0</h2>
                 <button id="clicker-btn" type="button" class="transparent-button" disabled>
@@ -72,21 +74,38 @@
                         (Cost: 50)</button>
                 </div>
                 <p id="level-info">
-                    By leveling up you get abilities like getting more cheese per click and cheese per second. As you progress it'll get harder to level up and the changes would get less affective.<br><b>You are currently level 1.</b>
+                    By leveling up you get abilities like getting more cheese per click and cheese per second. As you
+                    progress it'll get harder to level up and the changes would get less affective.<br><b>You are
+                        currently level 1.</b>
                 </p>
             </aside>
             <!-- Upgrade Shop -->
             <aside id="upgrade-shop" class="shop-section bg-dark text-light p-3">
                 <h3 class="text-warning text-center mb-3">Upgrade Shop</h3>
                 <div class="shop-content d-flex flex-column gap-3">
-                    <button class="btn btn-warning text-dark fw-bold upgrade-button" data-tooltip="מציע כמה עוזרים קטנים שיעזרו לך לקבל גבינה🧀"><img src="assets/images/pointer.png" alt="מצביע" width="32" height="32">  מצביע (עלות: 15)</button>
-                    <button class="btn btn-warning text-dark fw-bold upgrade-button" data-tooltip="נותן לך יכולת להוציא גבינה מתוך זהב כי מי צריך זהב?🧀"><img src="assets/images/golden_cheese.png" alt="גבינת זהב" width="32" height="32">  גבינת זהב (עלות: 200)</button>
-                    <button class="btn btn-warning text-dark fw-bold upgrade-button" data-tooltip="מגנט חתיכות גבינה ממכרות הירח🧀"><img src="assets/images/moon-magnet.png" alt="מגנט ירח" width="32" height="32">מגנט ירח (עלות: 1000)</button>
-                    <button class="btn btn-warning text-dark fw-bold upgrade-button" data-tooltip="מספק גבינה מהמפעל עם עובדי הגבינה הטובים ביותר🧀"><img src="assets/images/cheese-factory.png" alt="מפעל גבינה" width="32" height="32">  מפעל גבינה (עלות: 25000)</button>
-                    <button class="btn btn-warning text-dark fw-bold upgrade-button" data-tooltip="פרות קוסמיות שמייצרות גבינה נוספת🧀"><img src="assets/images/cosmic-cow.png" alt="פרה קוסמית" width="32" height="32">  פרה קוסמית (עלות: 100000)</button>
-                    <button class="btn btn-warning text-dark fw-bold upgrade-button" data-tooltip="משגר רקטות שמשגר גבינה ומגדיל את כמויותיה🧀"><img src="assets/images/rocket-launcher.png" alt="משגר רקטות" width="32" height="32">  משגר רקטות (עלות: 20000000)</button>
+                    <button class="btn btn-warning text-dark fw-bold upgrade-button"
+                        data-tooltip="מציע כמה עוזרים קטנים שיעזרו לך לקבל גבינה🧀"><img src="assets/images/pointer.png"
+                            alt="מצביע" width="32" height="32"> מצביע (עלות: 15)</button>
+                    <button class="btn btn-warning text-dark fw-bold upgrade-button"
+                        data-tooltip="נותן לך יכולת להוציא גבינה מתוך זהב כי מי צריך זהב?🧀"><img
+                            src="assets/images/golden_cheese.png" alt="גבינת זהב" width="32" height="32"> גבינת זהב
+                        (עלות: 200)</button>
+                    <button class="btn btn-warning text-dark fw-bold upgrade-button"
+                        data-tooltip="מגנט חתיכות גבינה ממכרות הירח🧀"><img src="assets/images/moon-magnet.png"
+                            alt="מגנט ירח" width="32" height="32">מגנט ירח (עלות: 1000)</button>
+                    <button class="btn btn-warning text-dark fw-bold upgrade-button"
+                        data-tooltip="מספק גבינה מהמפעל עם עובדי הגבינה הטובים ביותר🧀"><img
+                            src="assets/images/cheese-factory.png" alt="מפעל גבינה" width="32" height="32"> מפעל גבינה
+                        (עלות: 25000)</button>
+                    <button class="btn btn-warning text-dark fw-bold upgrade-button"
+                        data-tooltip="פרות קוסמיות שמייצרות גבינה נוספת🧀"><img src="assets/images/cosmic-cow.png"
+                            alt="פרה קוסמית" width="32" height="32"> פרה קוסמית (עלות: 100000)</button>
+                    <button class="btn btn-warning text-dark fw-bold upgrade-button"
+                        data-tooltip="משגר רקטות שמשגר גבינה ומגדיל את כמויותיה🧀"><img
+                            src="assets/images/rocket-launcher.png" alt="משגר רקטות" width="32" height="32"> משגר רקטות
+                        (עלות: 20000000)</button>
                 </div>
-                
+
             </aside>
         </div>
     </section>
@@ -95,10 +114,10 @@
     <section id="footer" class="bg-dark">
         <div class="container">
             <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-                <p class="col-md-4 mb-0 text-light">Credit: <a href="https://orteil.dashnet.org/cookieclicker/"
-                        class="text-light" target="_blank">Original Cookie Clicker</a></p>
+                <p id="footer-credit" class="col-md-4 mb-0 text-light"><span id="credit-prefix">Credit:</span> <a id="original-link" href="https://orteil.dashnet.org/cookieclicker/" class="text-light" target="_blank">Original Cookie Clicker</a></p>
                 <!-- Reset progress button -->
-                <button id="reset-btn" class="btn btn-sm btn-outline-danger ms-2" title="Reset all progress">Reset</button>
+                <button id="reset-btn" class="btn btn-sm btn-outline-danger ms-2"
+                    title="Reset all progress">Reset</button>
         </div>
         <br>
 

@@ -1,13 +1,17 @@
 /* Set BG and color palette variables */
 body {
-  --bg: #1f2326; /* dark gray */
-  --panel: #2a2d31; /* slightly lighter */
-  --accent: #ffd43b; /* yellow */
-  --muted: #bdbdbd; /* light gray */
+  --bg: #1f2326;
+  /* dark gray */
+  --panel: #2a2d31;
+  /* slightly lighter */
+  --accent: #ffd43b;
+  /* yellow */
+  --muted: #bdbdbd;
+  /* light gray */
   --text: #ffffff;
 
   background-color: var(--bg);
-  background-image: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 40%), url('./images/bg.png');
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, transparent 40%), url('./images/bg.png');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -66,8 +70,8 @@ body {
   max-height: 40vh;
   /* each takes half the screen roughly */
   border-left: 3px solid var(--accent);
-  box-shadow: -4px 6px 18px rgba(0,0,0,0.6);
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  box-shadow: -4px 6px 18px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
   overflow-y: auto;
   /* allows scrolling inside */
   scrollbar-width: thin;
@@ -87,8 +91,8 @@ body {
 .upgrade-button {
   position: relative;
   overflow: visible !important;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   color: var(--text);
   display: flex;
   align-items: center;
@@ -97,7 +101,17 @@ body {
   border-radius: 8px;
   transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
-.upgrade-button:hover { transform: translateY(-4px); background: rgba(255,212,59,0.06); box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+
+.upgrade-button:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 212, 59, 0.06);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+#upgrade-click:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
 
 /* Make sure main body aligns clicker + shops side by side */
 #body {
@@ -140,34 +154,79 @@ header.d-flex {
   align-items: center;
   gap: 12px;
 }
-header.d-flex { background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent); padding: 10px 0; }
-header.d-flex .fs-4 { color: var(--accent); font-weight: 800; }
+
+header.d-flex {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
+  padding: 10px 0;
+}
+
+header.d-flex .fs-4 {
+  color: var(--accent);
+  font-weight: 800;
+}
 
 /* Shop headings and warning buttons use the accent color */
-.shop-section h3, h3.text-warning { color: var(--accent) !important; }
-.btn.btn-warning { background: linear-gradient(180deg, var(--accent), #e6b800); border-color: rgba(0,0,0,0.15); color: #000; }
-.btn.btn-warning:hover { filter: brightness(0.95); }
+.shop-section h3,
+h3.text-warning {
+  color: var(--accent) !important;
+}
+
+.btn.btn-warning {
+  background: linear-gradient(180deg, var(--accent), #e6b800);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #000;
+}
+
+.btn.btn-warning:hover {
+  filter: brightness(0.95);
+}
 
 /* Ensure header doesn't overlap content */
-section#header { position: relative; z-index: 50; }
+section#header {
+  position: relative;
+  z-index: 50;
+}
 
 /* On small screens stack header elements vertically */
 @media (max-width: 768px) {
-  header.d-flex { flex-direction: column; align-items: center; }
-  #music-center { order: 2; margin: 6px 0; }
-  header .me-md-auto { order: 1; }
-  header .btn.btn-warning { order: 3; }
+  header.d-flex {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #music-center {
+    order: 2;
+    margin: 6px 0;
+  }
+
+  header .me-md-auto {
+    order: 1;
+  }
+
+  header .btn.btn-warning {
+    order: 3;
+  }
 }
 
 /* Touch-only: remove pointer cursors to avoid 'hand' flicker on mobile */
 @media (hover: none) {
-  button, .upgrade-button, .transparent-button { cursor: default; }
+
+  button,
+  .upgrade-button,
+  .transparent-button {
+    cursor: default;
+  }
 }
 
 /* Ensure shops have breathing room on small screens */
 @media (max-width: 576px) {
-  #shops { padding-bottom: 20px; }
-  .shop-section { margin-bottom: 18px; }
+  #shops {
+    padding-bottom: 20px;
+  }
+
+  .shop-section {
+    margin-bottom: 18px;
+  }
 }
 
 
@@ -240,61 +299,67 @@ section#header { position: relative; z-index: 50; }
 }
 
 .cheese-popup {
-    position: fixed;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-weight: bold;
-    font-size: 18px;
-    z-index: 9999;
+  position: fixed;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: bold;
+  font-size: 18px;
+  z-index: 9999;
 }
 
 .popup-text {
-    color: #ffd43b; /* cheese-ish yellow */
-    text-shadow: 0 0 6px #0006;
+  color: #ffd43b;
+  /* cheese-ish yellow */
+  text-shadow: 0 0 6px #0006;
 }
 
 .fade-out-up {
-    animation: fadeOutUp 1s ease-out forwards;
+  animation: fadeOutUp 1s ease-out forwards;
 }
 
 @keyframes fadeOutUp {
-    0% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-200px) scale(0.7);
-    }
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-200px) scale(0.7);
+  }
 }
 
 /* Upgrade tooltip styling */
 .upgrade-tooltip {
   position: absolute;
-  background: rgba(23,23,23,0.98);
+  background: rgba(23, 23, 23, 0.98);
   color: var(--accent);
-  border: 1px solid rgba(255,212,59,0.9);
+  border: 1px solid rgba(255, 212, 59, 0.9);
   padding: 10px 12px;
   border-radius: 8px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
   z-index: 10000;
-  pointer-events: none; /* don't block mouse events */
+  pointer-events: none;
+  /* don't block mouse events */
   max-width: 90vw;
   min-width: 140px;
   font-weight: 600;
   font-size: 13px;
   line-height: 1.2;
 }
+
 .upgrade-tooltip .ut-title {
   color: #fff;
   font-weight: 800;
   margin-bottom: 6px;
 }
+
 .upgrade-tooltip .ut-meta {
   color: #ffd43b;
 }
+
 .upgrade-tooltip .ut-owned {
   color: #ffffff;
   font-weight: 700;
@@ -307,14 +372,21 @@ section#header { position: relative; z-index: 50; }
   transition: transform 120ms ease, opacity 120ms ease;
   opacity: 0;
 }
+
 .upgrade-tooltip.show {
   transform: translateY(0);
   opacity: 1;
 }
 
 /* RTL adjustments when Hebrew is active */
-.rtl-text .upgrade-tooltip { direction: rtl; text-align: right; }
-.rtl-text header.d-flex { text-align: right; }
+.rtl-text .upgrade-tooltip {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl-text header.d-flex {
+  text-align: right;
+}
 
 /* Make images inside upgrade buttons non-interactable so hover/clicks hit the button */
 .upgrade-button img {
@@ -334,6 +406,7 @@ section#header { position: relative; z-index: 50; }
   opacity: 0;
   transition: transform 260ms ease, opacity 260ms ease;
 }
+
 .moon-upgrade.show {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
@@ -341,10 +414,19 @@ section#header { position: relative; z-index: 50; }
 
 /* Chill floating: small up/down bob and subtle rotation so icons 'sit' on the moon */
 @keyframes moon-upgrade-chill {
-  0% { transform: translate(-50%, -50%) translateY(0) rotate(-2deg) scale(1); }
-  50% { transform: translate(-50%, -50%) translateY(-8px) rotate(2deg) scale(1.02); }
-  100% { transform: translate(-50%, -50%) translateY(0) rotate(-2deg) scale(1); }
+  0% {
+    transform: translate(-50%, -50%) translateY(0) rotate(-2deg) scale(1);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) translateY(-8px) rotate(2deg) scale(1.02);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) translateY(0) rotate(-2deg) scale(1);
+  }
 }
+
 .moon-upgrade.chill {
   animation: moon-upgrade-chill 3000ms ease-in-out infinite;
 }
@@ -358,46 +440,138 @@ section#header { position: relative; z-index: 50; }
 }
 
 /* Music control styles */
-.music-controls { display: flex; align-items: center; gap: 8px; }
+.music-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .music-toggle {
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
   color: var(--text);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   padding: 6px 10px;
   border-radius: 20px;
   font-weight: 700;
   min-width: 54px;
 }
-.music-toggle[aria-pressed="true"] { background: linear-gradient(180deg, rgba(255,212,59,0.15), rgba(255,212,59,0.06)); color: white; border-color: rgba(255,212,59,0.9); }
+
+.music-toggle[aria-pressed="true"] {
+  background: linear-gradient(180deg, rgba(255, 212, 59, 0.15), rgba(255, 212, 59, 0.06));
+  color: white;
+  border-color: rgba(255, 212, 59, 0.9);
+}
+
 .music-toggle:hover {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   color: #ffcc00;
 }
 
-.mute-wrapper { position: relative; display: inline-flex; align-items: center; }
-.music-mute { background: transparent; border: none; color: var(--accent); font-size: 18px; padding: 6px; border-radius: 8px; cursor: pointer; }
-.music-mute:hover { background: rgba(255,255,255,0.03); }
-.volume-popout { position: absolute; right: 100%; top: 50%; transform: translateY(-50%); background: var(--panel); padding: 8px; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.6); display: none; white-space: nowrap; }
-.volume-popout .form-range { width: 140px; }
-.mute-wrapper:hover .volume-popout, .mute-wrapper:focus-within .volume-popout { display: block; }
+.mute-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.music-mute {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 18px;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.music-mute:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.volume-popout {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--panel);
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  display: none;
+  white-space: nowrap;
+}
+
+.volume-popout .form-range {
+  width: 140px;
+}
+
+.mute-wrapper:hover .volume-popout,
+.mute-wrapper:focus-within .volume-popout {
+  display: block;
+}
 
 @media (max-width: 576px) {
-  #music-center { gap: 6px; }
-  #music-volume { width: 110px; }
-  #music-toggle, #music-mute { height: 30px; min-width: 34px; font-size: 14px; }
+  #music-center {
+    gap: 6px;
+  }
+
+  #music-volume {
+    width: 110px;
+  }
+
+  #music-toggle,
+  #music-mute {
+    height: 30px;
+    min-width: 34px;
+    font-size: 14px;
+  }
 }
 
 /* Mobile centering improvements */
 @media (max-width: 768px) {
+
   /* Stack header elements and center them */
-  header.d-flex { flex-direction: column; align-items: center; text-align: center; }
-  header.d-flex > a { margin-bottom: 6px; }
-  #music-center { margin: 6px 0; }
+  header.d-flex {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  header.d-flex>a {
+    margin-bottom: 6px;
+  }
+
+  #music-center {
+    margin: 6px 0;
+  }
+
   /* Ensure the clicker area and moon are centered */
-  #clicker-area { width: 100%; display: flex; justify-content: center; }
-  #clicker { display: flex; flex-direction: column; align-items: center; }
-  #cheese-count, #cps { text-align: center; }
+  #clicker-area {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  #clicker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #cheese-count,
+  #cps {
+    text-align: center;
+  }
+
   /* Make shops full width and centered under the moon */
-  #shops { width: 100%; padding: 0 12px; box-sizing: border-box; }
-  .shop-section { margin: 12px auto; width: calc(100% - 24px); max-width: 720px; }
+  #shops {
+    width: 100%;
+    padding: 0 12px;
+    box-sizing: border-box;
+  }
+
+  .shop-section {
+    margin: 12px auto;
+    width: calc(100% - 24px);
+    max-width: 720px;
+  }
 }

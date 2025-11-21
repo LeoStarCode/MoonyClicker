@@ -27,7 +27,7 @@ const UI_TEXT = {
         cheeseCount: 'Cheese Count: ',
         cps: 'Cheese Per Second: ',
         levelInfo: 'By leveling up you get abilities like more cheese per click and per second. It gets harder as you progress.<br><b>You are currently level {level}.</b>',
-        levelUp: 'Level Up (Cost: {cost})',
+        levelUp: '⬆️  Level Up (Cost: {cost})',
         upgrades: {
             pointer: 'Pointer',
             goldenCheese: 'Golden Cheese',
@@ -41,7 +41,7 @@ const UI_TEXT = {
         cheeseCount: 'כמות גבינה: ',
         cps: 'גבינה לשנייה: ',
         levelInfo: 'על ידי העלאת רמה תקבל יכולות כמו יותר גבינה לכל לחיצה ולשנייה. זה נעשה קשה יותר ככל שתתקדם.<br><b>אתה כרגע ברמה {level}.</b>',
-        levelUp: 'שדרג (עלות: {cost})',
+        levelUp: ' ⬆️שדרג (עלות: {cost})',
         upgrades: {
             pointer: 'מצביע',
             goldenCheese: 'גבינת זהב',
@@ -70,6 +70,15 @@ UI_TEXT.he.noCheeseMsg = 'אין לך מספיק גבינה!';
 // Music enable label for hint button
 UI_TEXT.en.musicEnable = 'Enable Music';
 UI_TEXT.he.musicEnable = 'הפעל מוסיקה';
+
+// Footer credit/link translations
+UI_TEXT.en.creditPrefix = 'Credit:';
+UI_TEXT.en.originalLinkText = 'Original Cookie Clicker';
+UI_TEXT.en.originalLinkTitle = 'Open original Cookie Clicker in a new tab';
+
+UI_TEXT.he.creditPrefix = 'קרדיט:';
+UI_TEXT.he.originalLinkText = 'Cookie Clicker המקורי';
+UI_TEXT.he.originalLinkTitle = 'פתח את Cookie Clicker המקורי בלשונית חדשה';
 
 // Scale names for localized formatting
 UI_TEXT.en.scales = {
@@ -246,20 +255,26 @@ for (const key in upgradeButtonsLabeled) {
     Object.defineProperty(upgrade, 'cpsUp', { get: () => computeUpgradeEffect(upgrade.baseCPS, upgrade.timesBought) });
     Object.defineProperty(upgrade, 'cpcUp', { get: () => computeUpgradeEffect(upgrade.baseCPC, upgrade.timesBought) });
     // Make costs scale faster and add a soft exponential penalty so repeated purchases get expensive
-    Object.defineProperty(upgrade, 'cost', { get: () => Math.max(1, Math.floor(upgrade.baseCost * Math.pow(1.35, upgrade.timesBought) * (1 + Math.pow(upgrade.timesBought, 1.18) * 0.03) + Math.floor((upgrade.cpsUp + upgrade.cpcUp) / 2))) });
+    Object.defineProperty(upgrade, 'cost', { get: () => Math.max(1, Math.floor(upgrade.baseCost * (1.35 ** upgrade.timesBought) * (1 + 0.15 * Math.log2(1 + upgrade.timesBought)) + ((upgrade.cpsUp + upgrade.cpcUp) >> 1)))
+ });
 }
 
-// Compute upgrade effect with mild growth and diminishing returns so high counts give less per-buy
 function computeUpgradeEffect(baseValue, timesBought) {
-    const times = Math.max(0, Number(timesBought) || 0);
-    // base growth per purchase (smaller than before)
-    const growth = 1.05;
-    const raw = baseValue * Math.pow(growth, times);
-    // diminishing factor: grows with log10(times+1) so first few purchases are strong,
-    // but returns taper off as times increases
-    const damp = 1 + Math.log10(times + 1) * 0.45; // 0.45 tunes strength of damping
-    const val = Math.floor(raw / damp);
-    return Math.max(0, val);
+    const t = Math.max(0, Number(timesBought) || 0);
+
+    // Stronger base growth
+    const growth = 1.07; // was 1.05
+
+    // Raw exponential effect
+    const raw = baseValue * (growth ** t);
+
+    // Diminishing returns grows slower than raw (so effect still increases meaningfully)
+    // Uses sqrt(t+1) instead of log, because log was TOO soft for large counts.
+    const damp = 1 + Math.sqrt(t + 1) * 0.22;  // 0.22 controls curve steepness
+
+    const value = Math.floor(raw / damp);
+
+    return Math.max(0, value);
 }
 
 // --- Moon upgrade persistence helpers ---
@@ -317,8 +332,10 @@ function renderMoonUpgradeEntry(entry) {
     const moon = document.getElementById('moon');
     if (!moon) return;
     const rect = moon.getBoundingClientRect();
-    const x = rect.left + (entry.rx * rect.width);
-    const y = rect.top + (entry.ry * rect.height);
+    // convert viewport coordinates to document coordinates so absolute positioning
+    // stays aligned with the moon even when the page is scrolled
+    const x = rect.left + window.scrollX + (entry.rx * rect.width);
+    const y = rect.top + window.scrollY + (entry.ry * rect.height);
     const el = document.createElement('img');
     el.src = upg.src;
     el.className = 'moon-upgrade';
@@ -393,6 +410,21 @@ function updateCoreElements() {
             if (!upgrade.btn.dataset.tooltip) upgrade.btn.dataset.tooltip = upgrade.btn.getAttribute('data-tooltip') || '';
         }
     }
+    // Localize footer credit/link if present
+    try {
+        const creditEl = document.getElementById('credit-prefix');
+        const origLink = document.getElementById('original-link');
+        const origLinkHeader = document.getElementById('original-link-header');
+        if (creditEl) creditEl.textContent = (t.creditPrefix || UI_TEXT.en.creditPrefix || 'Credit:');
+        if (origLink) {
+            origLink.textContent = (t.originalLinkText || UI_TEXT.en.originalLinkText || 'Original Cookie Clicker');
+            origLink.title = (t.originalLinkTitle || UI_TEXT.en.originalLinkTitle || origLink.textContent);
+        }
+        if (origLinkHeader) {
+            origLinkHeader.textContent = (t.originalLinkText || UI_TEXT.en.originalLinkText || 'Original Cookie Clicker');
+            origLinkHeader.title = (t.originalLinkTitle || UI_TEXT.en.originalLinkTitle || origLinkHeader.textContent);
+        }
+    } catch (e) { /* non-fatal */ }
 }
 
 // Disable buttons
@@ -624,17 +656,7 @@ for (const key in upgradeButtonsLabeled) {
             showRandomQuestion(isCorrect => {
                 if (isCorrect) {
                     score -= upgrade.cost;
-                    upgrade.timesBought++;
-                    // Increase aside totals by the contribution of this purchase
-                    // (cpsUp/cpcUp are getters based on current timesBought)
-                    asideCPS += upgrade.cpsUp;
-                    asideCPC += upgrade.cpcUp;
-                    // persist the timesBought for this upgrade
-                    try { _setStoredUpgradeCount(key, upgrade.timesBought); } catch (e) { console.error(e); }
-                    updateCoreElements();
-                    saveCore();
-                    // spawn a little icon on the moon to mark this purchase and save it
-                    try { spawnUpgradeOnMoonKey && spawnUpgradeOnMoonKey(key, true); } catch (e) { console.error(e); }
+                    addUpgrade(key);
                 } else {
                     score -= upgrade.cost / 2; // penalty for wrong answer
                     updateCoreElements();
@@ -646,6 +668,25 @@ for (const key in upgradeButtonsLabeled) {
                 alert(msg);
         }
     });
+
+function addUpgrade(key, times) {
+    const timesTo = (times == undefined) ? 1 : times;
+    const upgrade = upgradeButtonsLabeled[key] || {};
+    upgrade.timesBought += timesTo;
+    // Increase aside totals by the contribution of this purchase
+    // (cpsUp/cpcUp are getters based on current timesBought)
+    asideCPS += upgrade.cpsUp;
+    asideCPC += upgrade.cpcUp;
+    // persist the timesBought for this upgrade
+    try { _setStoredUpgradeCount(key, upgrade.timesBought); } catch (e) { console.error(e); }
+    updateCoreElements();
+    saveCore();
+    // spawn a little icon on the moon to mark this purchase and save it
+    for (let i = 0; i < timesTo; i++) {
+        try { spawnUpgradeOnMoonKey && spawnUpgradeOnMoonKey(key, true); } catch (e) { console.error(e); }
+    }
+}
+
 
     // Tooltip: show upgrade details and owned count on hover
     if (upgrade.btn) {
@@ -792,8 +833,10 @@ for (const key in upgradeButtonsLabeled) {
             el.className = 'moon-upgrade';
             el.width = 56;
             el.height = 56;
-            el.style.left = `${x}px`;
-            el.style.top = `${y}px`;
+            // Convert viewport coords to document coords so the absolute element
+            // remains aligned with the moon when scrolling
+            el.style.left = `${x + window.scrollX}px`;
+            el.style.top = `${y + window.scrollY}px`;
             document.body.appendChild(el);
             // show and give it a chill idle animation so it stays on the moon
             requestAnimationFrame(() => {
@@ -915,8 +958,8 @@ function updateAllMoonUpgradePositions() {
         if (!Array.isArray(saved)) return;
         saved.forEach(entry => {
             const sel = document.querySelector(`img.moon-upgrade[data-entry-id="${entry.id}"]`);
-            const x = rect.left + (entry.rx * rect.width);
-            const y = rect.top + (entry.ry * rect.height);
+            const x = rect.left + window.scrollX + (entry.rx * rect.width);
+            const y = rect.top + window.scrollY + (entry.ry * rect.height);
             if (sel) {
                 sel.style.left = `${x}px`;
                 sel.style.top = `${y}px`;

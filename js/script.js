@@ -5,6 +5,7 @@ const cheeseCountLabel = document.getElementById('cheese-count');
 const cpsLabel = document.getElementById('cps');
 const levelInfoLabel = document.getElementById('level-info');
 const upgradeButtons = document.getElementsByClassName('upgrade-button');
+const buySellModeButton = document.getElementById('buy-sell-button');
 
 // Audio
 const popSound = new Audio('./assets/audio/pop_sound.mp3');
@@ -20,6 +21,14 @@ const langSelect = document.getElementById('lang-select');
 const resetBtn = document.getElementById('reset-btn');
 // Default language: prefer saved value, otherwise default to Hebrew ('he')
 let currentLang = localStorage.getItem('lang') || 'he';
+// Current Buy/Sell mode
+let isBuyMode = true;
+
+function randomIntBetween(min, max) {
+  min = Math.ceil(min); // Ensure min is an integer
+  max = Math.floor(max); // Ensure max is an integer
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 // Simple translations for UI strings
 const UI_TEXT = {
@@ -34,7 +43,8 @@ const UI_TEXT = {
             moonMagnet: 'Moon Magnet',
             cheeseFactory: 'Cheese Factory',
             cosmicCow: 'Cosmic Cow',
-            rocketLauncher: 'Rocket Launcher'
+            rocketLauncher: 'Rocket Launcher',
+            buySellButton: ['Buy Mode', 'Sell Mode']
         }
     },
     he: {
@@ -48,10 +58,13 @@ const UI_TEXT = {
             moonMagnet: 'מגנט ירח',
             cheeseFactory: 'מפעל גבינה',
             cosmicCow: 'פרה קוסמית',
-            rocketLauncher: 'משגר רקטות'
+            rocketLauncher: 'משגר רקטות',
+            buySellButton: ['מצב קנייה', 'מצב מכירה']
         }
     }
 };
+
+
 
 // Extra UI labels
 UI_TEXT.en.costLabel = 'Cost';
@@ -244,7 +257,7 @@ const upgradeButtonsLabeled = {
     goldenCheese: { name: 'Golden Cheese', src: './assets/images/golden_cheese.png', btn: upgradeButtons[1], baseCost: 200, baseCPS: 5, baseCPC: 7, timesBought: 0 },
     moonMagnet: { name: 'Moon Magnet', src: './assets/images/moon-magnet.png', btn: upgradeButtons[2], baseCost: 1000, baseCPS: 20, baseCPC: 23, timesBought: 0 },
     cheeseFactory: { name: 'Cheese Factory', src: './assets/images/cheese-factory.png', btn: upgradeButtons[3], baseCost: 25000, baseCPS: 100, baseCPC: 120, timesBought: 0 },
-    cosmicCow: { name: 'Cosmic Cow', src: './assets/images/cosmic-cow.png', btn: upgradeButtons[4], baseCost: 100000, baseCPS: 500, baseCPC: 600, timesBought: 0 },
+    cosmicCow: { name: 'Cosmic Cow', src: './assets/images/cosmic-cow.png', btn: upgradeButtons[4], baseCost: 100000, baseCPS: 1500, baseCPC: 1250, timesBought: 0 },
     rocketLauncher: { name: 'Rocket Launcher', src: './assets/images/rocket-launcher.png', btn: upgradeButtons[5], baseCost: 20000000, baseCPS: 15000, baseCPC: 20000, timesBought: 0 }
 };
 
@@ -252,10 +265,10 @@ const upgradeButtonsLabeled = {
 for (const key in upgradeButtonsLabeled) {
     const upgrade = upgradeButtonsLabeled[key];
     // Helper will be defined below; use getters that call helper to apply diminishing returns
-    Object.defineProperty(upgrade, 'cpsUp', { get: () => computeUpgradeEffect(upgrade.baseCPS, upgrade.timesBought) });
-    Object.defineProperty(upgrade, 'cpcUp', { get: () => computeUpgradeEffect(upgrade.baseCPC, upgrade.timesBought) });
+    Object.defineProperty(upgrade, 'cpsUp', { get: () => upgrade.timesBought < 1 ? upgrade.baseCPS : computeUpgradeEffect(upgrade.baseCPS, upgrade.timesBought) });
+    Object.defineProperty(upgrade, 'cpcUp', { get: () => upgrade.timesBought < 1 ? upgrade.baseCPC : computeUpgradeEffect(upgrade.baseCPC, upgrade.timesBought) });
     // Make costs scale faster and add a soft exponential penalty so repeated purchases get expensive
-    Object.defineProperty(upgrade, 'cost', { get: () => Math.max(1, Math.floor(upgrade.baseCost * (1.35 ** upgrade.timesBought) * (1 + 0.15 * Math.log2(1 + upgrade.timesBought)) + ((upgrade.cpsUp + upgrade.cpcUp) >> 1)))
+    Object.defineProperty(upgrade, 'cost', { get: () => upgrade.timesBought < 1 ? upgrade.baseCost : Math.floor(100 * Math.pow(upgrade.timesBought, 3)) + upgrade.baseCost
  });
 }
 
@@ -326,7 +339,7 @@ function _recomputeAsideValuesFromSaved() {
     }
 }
 
-function renderMoonUpgradeEntry(entry) {
+function renderMoonUpgradeEntry(entry, key) {
     const upg = upgradeButtonsLabeled[entry.key];
     if (!upg) return;
     const moon = document.getElementById('moon');
@@ -338,7 +351,7 @@ function renderMoonUpgradeEntry(entry) {
     const y = rect.top + window.scrollY + (entry.ry * rect.height);
     const el = document.createElement('img');
     el.src = upg.src;
-    el.className = 'moon-upgrade';
+    el.className = `moon-upgrade moon-upgrade-${entry.key}`;
     // display slightly larger without changing source resolution
     el.width = 56;
     el.height = 56;
@@ -373,10 +386,41 @@ function spawnUpgradeOnMoonKey(key, persist = true) {
 
         const entry = { id: Date.now().toString(36) + Math.floor(Math.random()*1000), key, rx, ry };
         // render now
-        renderMoonUpgradeEntry(entry);
+        renderMoonUpgradeEntry(entry, key);
         if (persist) _addStoredMoonUpgrade(entry);
     } catch (err) { console.error('spawnUpgradeOnMoonKey error', err); }
 }
+
+function removeUpgradeFromMoonKey(key) {
+    try {
+        // Remove one entry from localStorage
+        try {
+            const arr = JSON.parse(localStorage.getItem('moonUpgrades') || '[]');
+            const index = arr.findIndex(entry => entry.key === key);
+            if (index !== -1) arr.splice(index, 1); // remove only one
+            localStorage.setItem('moonUpgrades', JSON.stringify(arr));
+
+            // Keep your persistence function in sync
+            _saveStoredMoonUpgrades(arr);
+        } catch (e) {
+            console.error('_removeStoredMoonUpgradeByKey error', e);
+        }
+
+        const moonUpgrades = document.querySelectorAll(`img.moon-upgrade-${key}`);
+        if (!moonUpgrades.length) return; // nothing to remove
+
+        // Pick the first one
+        const node = moonUpgrades[0];
+
+        // Remove the element
+        node.remove();
+
+    } catch (err) {
+        console.error('removeOneUpgradeFromMoonKey error', err);
+    }
+}
+
+
 
 // Update scaling values
 function updateValues() {
@@ -384,10 +428,14 @@ function updateValues() {
     // cpc grows slowly with level; upgrades still add to asideCPC
     cpc = (level < 2 ? 1 : Math.ceil(1 + Math.pow(level, 1.35))) + asideCPC;
     // cps also grows more slowly with level
-    cps = (level < 2 ? 0 : Math.ceil(Math.pow(level, 1.6))) + asideCPS;
+    cps = (level < 2 ? 0 : Math.ceil(Math.pow(level, 2))) + asideCPS;
     // Raise level-up costs significantly to slow leveling
     levelCost = level < 2 ? 100 : Math.floor(100 * Math.pow(level, 3.0));
 }
+
+buySellModeButton.addEventListener('click', () => {
+    isBuyMode = !isBuyMode;
+})
 
 // Update UI
 function updateCoreElements() {
@@ -398,6 +446,12 @@ function updateCoreElements() {
     cpsLabel.textContent = t.cps + formatNumberLocalized(cps);
     levelInfoLabel.innerHTML = fmt(t.levelInfo, { level });
     levelUpButton.textContent = fmt(t.levelUp, { cost: formatNumberLocalized(levelCost) });
+
+    buySellModeButton.textContent = isBuyMode
+    ? (t.upgrades.buySellButton[0] || "Buy Mode")
+    : (t.upgrades.buySellButton[1] || "Sell Mode");
+
+
     for (const key in upgradeButtonsLabeled) {
         const upgrade = upgradeButtonsLabeled[key];
         // Use the upgrade's proper name and current cost when rendering the button label
@@ -514,6 +568,118 @@ function popCheesePopup(e) {
     cheesePopup.addEventListener("animationend", () => cheesePopup.remove());
 }
 
+function startMeteorShower(durationSeconds) {
+    const totalMeteors = Math.floor(durationSeconds * 5); // 5 meteors per second
+    for (let i = 0; i < totalMeteors; i++) {
+        setTimeout(createMeteor, i * 200); // space each meteor by 200ms
+    }
+
+    function createMeteor() {
+        const meteor = document.createElement('div');
+        const img = document.createElement('img');
+        img.src = './assets/images/meteor-mini.png';
+        img.alt = 'Meteor';
+        meteor.appendChild(img);
+        meteor.classList.add('meteor-shower');
+
+        // Random starting position (X)
+        const startX = Math.random() * window.innerWidth;
+        // Random falling distance (Y)
+        const endY = window.innerHeight + 50;
+        // Random horizontal drift (X)
+        const endX = startX;
+
+        // Random speed
+        const duration = Math.random() * 2 + 1;
+
+        meteor.style.setProperty('--startX', `${startX}px`);
+        meteor.style.setProperty('--endY', `${endY}px`);
+        meteor.style.setProperty('--endX', `${endX}px`);
+        meteor.style.animationDuration = `${duration}s`;
+
+        document.body.appendChild(meteor);
+
+        // Remove meteor after animation ends
+        meteor.addEventListener('animationend', () => meteor.remove());
+    }
+}
+
+function popMeteorPopup() {
+    const btn = spawnMeteor();
+
+    btn.addEventListener('click', () => {
+        btn.remove();
+
+        const possibilities = ['a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'b', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'd', 'd', 'd', 'e', 'e'];
+        const choice = possibilities[Math.floor(Math.random() * possibilities.length)];
+
+        if (choice === 'a') {
+            const add = Math.floor(score + Math.ceil((score + 100) / 15));
+            score += add;
+            alert(`Meteor shower! You gained ${formatNumberLocalized(add)} cheese!`);
+            startMeteorShower(10);
+        } else if (choice === 'b') {
+            const originalCPS = asideCPS;
+            alert('Meteor shower! Your cheese per second is boosted for 77 seconds!');
+            asideCPS = ceil(asideCPS + cps / 10) * 2;
+            startMeteorShower(10);
+            setTimeout(() => { asideCPS = originalCPS; }, 77000);
+        } else if (choice === 'c') {
+            const originalCPC = asideCPC;
+            alert('Meteor shower! Your cheese per click is boosted for 77 seconds!');
+            asideCPC = ceil(asideCPC + cpc / 10) * 2;
+            startMeteorShower(10);
+            setTimeout(() => { asideCPC = originalCPC; }, 77000);
+        } else if (choice === 'd') {
+            const originalCPS = asideCPS;
+            const originalCPC = asideCPC;
+            alert('Meteor shower! Your cheese per second and cheese per click is boosted for 77 seconds!');
+            asideCPS = ceil(asideCPS + cps / 10) * 2;
+            asideCPC = ceil(asideCPC + cpc / 10) * 2;
+            startMeteorShower(10);
+            setTimeout(() => { asideCPS = originalCPS; asideCPC = originalCPC; }, 77000);
+        } else {
+            const keys = Object.keys(upgradeButtonsLabeled);
+            const randomKey = keys[Math.floor(Math.random() * keys.length)];
+            alert(`Meteor shower! You received a free ${upgradeButtonsLabeled[randomKey].name}!`);
+            addUpgrade(randomKey);
+        }
+
+        btn.remove();
+        updateValues();
+        updateCoreElements();
+        saveCore();
+    });
+
+    function spawnMeteor() {
+        const meteor = document.createElement('div');
+        const btn = document.createElement('button');
+        btn.innerHTML = '<img src="./assets/images/meteor.png" alt="Meteor" width="250" height="250">';
+        meteor.appendChild(btn);
+        meteor.classList.add('meteor');
+
+        const startX = Math.random() * window.innerWidth;
+        const height = window.innerHeight;
+        const min = Math.floor(height / 4);
+        const max = Math.floor(height - height / 4);
+        const endY = Math.floor(Math.random() * (max - min + 1)) + min + 50;
+        const endX = startX + (Math.random() * 200 - 100);
+
+        meteor.style.setProperty('--startX', `${startX}px`);
+        meteor.style.setProperty('--endY', `${endY}px`);
+        meteor.style.setProperty('--endX', `${endX}px`);
+
+        document.body.appendChild(meteor);
+
+        return btn;
+    }
+}
+
+setInterval(() => {
+    const btn = popMeteorPopup();
+    setTimeout(() => { if(btn) {btn.remove()} }, 120000); // remove after 2 minutes if not clicked
+}, randomIntBetween(180000, 600000)); // every 3 to 10 minutes
+
 // Register click / add cheese
 function register_click(amount) {
     score += amount;
@@ -537,7 +703,38 @@ function loadQuestionsForLang(lang) {
         return r.json();
     }).then(data => {
         if (data && Array.isArray(data.questions)) {
+            function shuffleQuestions() {
+            // Assuming your JSON is stored in a variable called 'data'
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            // Shuffle the questions
+            data.questions = shuffleArray(data.questions);
+
+            data.questions.forEach(q => {
+                const options = q.options.map((opt, index) => ({ opt, index }));
+                shuffleArray(options);
+                
+                // Update options
+                q.options = options.map(o => o.opt);
+                
+                // Update correct index
+                q.correct = options.findIndex(o => o.index === q.correct);
+            });
             quizData = data;
+            }
+            levelUpButton.addEventListener('click', shuffleQuestions);
+            for(const key in upgradeButtonsLabeled) {
+                const upgrade = upgradeButtonsLabeled[key];
+                if (upgrade.btn) {
+                    upgrade.btn.addEventListener('click', shuffleQuestions);
+                }
+            }
         }
     }).catch(err => {
         console.warn('Failed to load questions for', lang, err);
@@ -645,30 +842,6 @@ if (levelUpButton) {
     });
 }
 
-// Upgrade buttons
-for (const key in upgradeButtonsLabeled) {
-    const upgrade = upgradeButtonsLabeled[key];
-    // If button element isn't present (safer on partial DOMs), skip this upgrade
-    if (!upgrade.btn) continue;
-
-    upgrade.btn.addEventListener('click', () => {
-        if (score >= upgrade.cost) {
-            showRandomQuestion(isCorrect => {
-                if (isCorrect) {
-                    score -= upgrade.cost;
-                    addUpgrade(key);
-                } else {
-                    score -= upgrade.cost / 2; // penalty for wrong answer
-                    updateCoreElements();
-                    saveCore();
-                }
-            });
-        } else {
-                const msg = (UI_TEXT[currentLang] && UI_TEXT[currentLang].noCheeseMsg) || UI_TEXT.en.noCheeseMsg;
-                alert(msg);
-        }
-    });
-
 function addUpgrade(key, times) {
     const timesTo = (times == undefined) ? 1 : times;
     const upgrade = upgradeButtonsLabeled[key] || {};
@@ -687,6 +860,66 @@ function addUpgrade(key, times) {
     }
 }
 
+function sellUpgrade(key, times) {
+    const timesTo = (times === undefined) ? 1 : times;
+    const upgrade = upgradeButtonsLabeled[key] || {};
+
+    for (let i = 0; i < timesTo; i++) {
+        const cpsToRemove = upgrade.cpsUp;
+        const cpcToRemove = upgrade.cpcUp;
+
+        upgrade.timesBought--;
+
+        asideCPS -= cpsToRemove;
+        if (asideCPS < 0) asideCPS = 0;
+        asideCPC -= cpcToRemove;
+        if (asideCPC < 0) asideCPC = 0;
+
+        score += Math.floor(upgrade.cost * 0.5); // refund half the current cost
+        saveCore();
+
+        try { _setStoredUpgradeCount(key, upgrade.timesBought); } catch (e) { console.error(e); }
+
+        updateCoreElements();
+        saveCore();
+
+        try {
+            removeUpgradeFromMoonKey && removeUpgradeFromMoonKey(key, true);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+}
+
+// Upgrade buttons
+for (const key in upgradeButtonsLabeled) {
+    const upgrade = upgradeButtonsLabeled[key];
+    // If button element isn't present (safer on partial DOMs), skip this upgrade
+    if (!upgrade.btn) continue;
+
+    upgrade.btn.addEventListener('click', () => {
+        if (isBuyMode) {
+            if (score >= upgrade.cost) {
+            showRandomQuestion(isCorrect => {
+                if (isCorrect) {
+                    score -= upgrade.cost;
+                    addUpgrade(key);
+                } else {
+                    score -= upgrade.cost / 2; // penalty for wrong answer
+                    updateCoreElements();
+                    saveCore();
+                }
+            });
+        } else {
+                const msg = (UI_TEXT[currentLang] && UI_TEXT[currentLang].noCheeseMsg) || UI_TEXT.en.noCheeseMsg;
+                alert(msg);
+        }
+        } else {
+            sellUpgrade(key);
+            updateCoreElements();
+            saveCore();
+        }
+    });
 
     // Tooltip: show upgrade details and owned count on hover
     if (upgrade.btn) {

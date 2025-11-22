@@ -621,21 +621,21 @@ function popMeteorPopup() {
         } else if (choice === 'b') {
             const originalCPS = asideCPS;
             alert('Meteor shower! Your cheese per second is boosted for 77 seconds!');
-            asideCPS = ceil(asideCPS + cps / 10) * 2;
+            asideCPS = Math.ceil(asideCPS + cps / 10) * 2;
             startMeteorShower(10);
             setTimeout(() => { asideCPS = originalCPS; }, 77000);
         } else if (choice === 'c') {
             const originalCPC = asideCPC;
             alert('Meteor shower! Your cheese per click is boosted for 77 seconds!');
-            asideCPC = ceil(asideCPC + cpc / 10) * 2;
+            asideCPC = Math.ceil(asideCPC + cpc / 10) * 2;
             startMeteorShower(10);
             setTimeout(() => { asideCPC = originalCPC; }, 77000);
         } else if (choice === 'd') {
             const originalCPS = asideCPS;
             const originalCPC = asideCPC;
             alert('Meteor shower! Your cheese per second and cheese per click is boosted for 77 seconds!');
-            asideCPS = ceil(asideCPS + cps / 10) * 2;
-            asideCPC = ceil(asideCPC + cpc / 10) * 2;
+            asideCPS = Math.ceil(asideCPS + cps / 10) * 2;
+            asideCPC = Math.ceil(asideCPC + cpc / 10) * 2;
             startMeteorShower(10);
             setTimeout(() => { asideCPS = originalCPS; asideCPC = originalCPC; }, 77000);
         } else {

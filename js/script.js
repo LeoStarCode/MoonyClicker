@@ -849,7 +849,7 @@ if (levelUpButton) {
 
 function addUpgrade(key, times, charge) {
     const timesTo = (times == undefined) ? 1 : times;
-    const charge = (charge === undefined) ? false : charge;
+    const toCharge = (charge == undefined) ? false : charge;
     const upgrade = upgradeButtonsLabeled[key] || {};
     upgrade.timesBought += timesTo;
     // Increase aside totals by the contribution of this purchase
@@ -857,7 +857,7 @@ function addUpgrade(key, times, charge) {
     asideCPS += upgrade.cpsUp;
     asideCPC += upgrade.cpcUp;
 
-    if (!charge) {
+    if (toCharge) {
         score -= upgrade.cost;
     }
     // persist the timesBought for this upgrade

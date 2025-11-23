@@ -455,7 +455,7 @@ section#header {
 }
 
 /* Chill floating: small up/down bob and subtle rotation so icons 'sit' on the moon */
-@keyframes moon-upgrade-chill {
+@keyframes chill {
   0% {
     transform: translate(-50%, -50%) translateY(0) rotate(-2deg) scale(1);
   }
@@ -470,7 +470,7 @@ section#header {
 }
 
 .moon-upgrade.chill {
-  animation: moon-upgrade-chill 3000ms ease-in-out infinite;
+  animation: chill 3000ms ease-in-out infinite;
 }
 
 /* Hint the browser to use higher-quality scaling for small icons */
